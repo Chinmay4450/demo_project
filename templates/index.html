@@ -2,9 +2,19 @@
 <html lang="en">
 <head>
     {% include 'head.html'%}
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
-    <script type="text/javascript" src="http://sigmajs.org/js/prettify.js"></script>
-    <script type="text/javascript" src="http://sigmajs.org/js/sigma.min.js"></script>
+
+    <style>
+        .highcharts-figure,
+.highcharts-data-table table {
+    min-width: 200px;
+    max-width: 400px;
+    margin: 1em auto;
+}
+
+
+
+    </style>
+    
 </head>
 <body id="page-top">
    <div id="wrapper">
@@ -61,7 +71,37 @@
 
                 <div class="container-fluid">
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800">Network Diagram</h1>
+                        <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+                    </div>
+                    <div class="row">
+
+                        <div class="col-xl-12 col-lg-12">
+                            <div class="card shadow mb-4">
+                                <div
+                                    class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Network Diagram</h6>
+                                    
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-area">
+                                        <figure class="highcharts-figure">
+                                            <div id="container"></div>
+                                            
+                                        </figure>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+
+
+
+
+                    </div>
+
+
+                        
                     </div>
                 </div>
 
@@ -75,3 +115,118 @@
 </body>
 </html>
 
+
+<script>
+
+Highcharts.addEvent(
+    Highcharts.Series,
+    'afterSetOptions',
+    function (e) {
+
+        const colors = Highcharts.getOptions().colors,
+            nodes = {};
+
+        let i = 0;
+
+        if (
+            this instanceof Highcharts.Series.types.networkgraph &&
+            e.options.id === 'lang-tree'
+        ) {
+            e.options.data.forEach(function (link) {
+
+                if (link[0] === 'Proto Indo-European') {
+                    nodes['Proto Indo-European'] = {
+                        id: 'Proto Indo-European',
+                        marker: {
+                            radius: 20
+                        }
+                    };
+                    nodes[link[1]] = {
+                        id: link[1],
+                        marker: {
+                            radius: 10
+                        },
+                        color: colors[i++]
+                    };
+                } else if (nodes[link[0]] && nodes[link[0]].color) {
+                    nodes[link[1]] = {
+                        id: link[1],
+                        color: nodes[link[0]].color
+                    };
+                }
+            });
+
+            e.options.nodes = Object.keys(nodes).map(function (id) {
+                return nodes[id];
+            });
+        }
+    }
+);
+
+Highcharts.chart('container', {
+    chart: {
+        type: 'networkgraph',
+        height: '50%'
+    },
+    title: {
+        text: 'Network Graph',
+        align: 'left'
+    }
+    ,
+    plotOptions: {
+        networkgraph: {
+            keys: ['from', 'to'],
+            layoutAlgorithm: {
+                enableSimulation: true,
+                friction: -0.9
+            }
+        }
+    },
+    series: [{
+        accessibility: {
+            enabled: false
+        },
+        dataLabels: {
+            enabled: true,
+            linkFormat: '',
+            style: {
+                fontSize: '0.8em',
+                fontWeight: 'normal'
+            }
+        },
+        id: 'lang-tree',
+        data: [
+            ['Proto Indo-European', 'Balto-Slavic'],
+            ['Proto Indo-European', 'Germanic'],
+            ['Proto Indo-European', 'Celtic'],
+            ['Proto Indo-European', 'Italic'],
+            ['Proto Indo-European', 'Hellenic'],
+            ['Proto Indo-European', 'Anatolian'],
+            ['Proto Indo-European', 'Indo-Iranian'],
+            ['Proto Indo-European', 'Tocharian'],
+            ['Indo-Iranian', 'Dardic'],
+            ['Indo-Iranian', 'Indic'],
+            ['Indo-Iranian', 'Iranian'],
+            
+            // Leaves:
+            ['Proto Indo-European', 'Phrygian'],
+            ['Proto Indo-European', 'Armenian'],
+            ['Proto Indo-European', 'Albanian'],
+            ['Proto Indo-European', 'Thracian'],
+            ['Tocharian', 'Tocharian A'],
+            ['Tocharian', 'Tocharian B'],
+            ['Anatolian', 'Hittite'],
+            ['Anatolian', 'Palaic'],
+            ['Anatolian', 'Luwic'],
+            ['Anatolian', 'Lydian'],
+            ['Iranian', 'Balochi'],
+            ['Iranian', 'Kurdish'],
+            ['Iranian', 'Pashto'],
+            ['Iranian', 'Sogdian'],
+            
+        ]
+    }]
+});
+
+   
+  </script>
